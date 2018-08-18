@@ -14,6 +14,7 @@ frame_skip_counter = 0
 face_locations = None
 face_count = 0
 new_face_tick = -1
+is_boarding_mode = True
 
 
 def handle_new_face(frame):
@@ -53,12 +54,26 @@ while True:
 
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
+    if is_boarding_mode:
+        mode = "Boarding Mode"
+    else:
+        mode = "Get Off Mode"
+
+    font = cv2.FONT_HERSHEY_DUPLEX
+    cv2.rectangle(frame, (0, 0), (500, 80), (0, 0, 0), cv2.FILLED)
+    cv2.putText(frame, mode, (0, 60), font, 2.0, (255, 255, 255), 1)
+
     cv2.imshow('Video', frame)
     
     frame_skip_counter -= 1
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    key = cv2.waitKey(1)
+
+    if key & 0xFF == ord('q'):
         break
+
+    if key & 0xFF == ord('m'):
+        is_boarding_mode = not is_boarding_mode
 
 video_capture.release()
 cv2.destroyAllWindows()
