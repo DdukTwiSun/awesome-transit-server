@@ -15,6 +15,11 @@ def index():
         session=str(boto3.DEFAULT_SESSION)
         ))
 
+@app.route("/create_collection")
+def create_collection():
+    result = reko_client.create_collection(CollectionId=face_collection_name)
+    return jsonify(result)
+
 
 @app.route("/upload_face", methods=["POST"])
 def upload_face():
@@ -40,7 +45,8 @@ def find_face():
                 Image={'Bytes': image.read()},
                 FaceMatchThreshold=90,
                 MaxFaces=1)
-    except:
+    except Exception as e:
+        print(e)
         return jsonify(dict(name=None))
 
 
