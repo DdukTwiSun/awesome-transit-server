@@ -56,6 +56,18 @@ def create_collection():
     result = reko_client.create_collection(CollectionId=face_collection_name)
     return jsonify(result)
 
+@app.route('/drop_faces')
+def drop_faces():
+    response = reko_client.list_faces(CollectionId=face_collection_name)
+    print('list: ', response)
+
+    face_ids = list(map(lambda x: x['FaceId'], response['Faces']))
+    response = reko_client.delete_faces(CollectionId=face_collection_name,
+            FaceIds=face_ids)
+    print('delete: ', response)
+
+    return jsonify(dict(result=True))
+
 
 @app.route("/upload_face", methods=["POST"])
 def upload_face():
