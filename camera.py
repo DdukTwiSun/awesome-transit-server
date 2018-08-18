@@ -3,6 +3,7 @@ import cv2
 import os
 import requests
 from multiprocessing import Pool
+import sys
 
 FRAME_SKIP = 1
 RESIZE = 0.4
@@ -17,12 +18,20 @@ new_face_tick = -1
 is_boarding_mode = True
 
 
-def handle_new_face(frame):
+def handle_boarding(frame):
     ret, buf = cv2.imencode('.jpg', frame)
-    response = requests.post(API_URL + "find_face",
+    response = requests.post(API_URL + "enter",
             files=dict(file=buf))
     body = response.json()
     print(body)
+
+def handle_getting_off(frame):
+    ret, buf = cv2.imencode('.jpg', frame)
+    response = requests.post(API_URL + "leave",
+            files=dict(file=buf))
+    body = response.json()
+    print(body)
+
 
 pool = Pool(processes=4)
 
@@ -43,7 +52,11 @@ while True:
         face_count = new_face_count
 
     if new_face_tick == 0:
-        pool.apply_async(handle_new_face, frame)
+        if is_boarding_mode:
+            handle_boarding(frame)
+        else:
+            handle_getting_off(frame)
+
         new_face_tick = -1
     elif new_face_tick != -1:
         new_face_tick -= 1
@@ -73,6 +86,7 @@ while True:
         break
 
     if key & 0xFF == ord('m'):
+        face_locations = []
         is_boarding_mode = not is_boarding_mode
 
 video_capture.release()
