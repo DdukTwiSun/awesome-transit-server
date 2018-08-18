@@ -156,6 +156,7 @@ def enter():
         return jsonify(dict(result=False))
 
 
+    last_enter_faces = db.reference().child('noti_leave').child('last_leave_faces').set([])
     last_enter_faces = db.reference().child('noti_enter').child('last_enter_faces').get()
     if last_enter_faces is None:
         last_enter_faces = []
@@ -205,6 +206,7 @@ def leave():
         return jsonify(dict(result=False))
 
 
+    last_enter_faces = db.reference().child('noti_enter').child('last_enter_faces').set([])
     last_leave_faces = db.reference().child('noti_leave').child('last_leave_faces').get()
     if last_leave_faces is None:
         last_leave_faces = []
