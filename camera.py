@@ -1,29 +1,23 @@
 import face_recognition
 import cv2
 import os
-
+import requests
 
 FRAME_SKIP = 1
-RESIZE = 0.5
+RESIZE = 0.4
+API_URL = "https://35z2j7wfmi.execute-api.ap-northeast-1.amazonaws.com/dev/"
 
 video_capture = cv2.VideoCapture(0)
 frame_skip_counter = 0
 face_locations = None
-detected_face_names = []
+face_count = 0
 
-known_face_encodings = []
-known_face_names = []
 
-for filename in os.listdir('./peoples'):
-    name, ext = filename.split(".")
-    fullpath = os.path.join('./peoples', filename)
-    image = face_recognition.load_image_file(fullpath)
-    encoding = face_recognition.face_encodings(image)[0]
-
-    known_face_names.append(name)
-    known_face_encodings.append(encoding)
-
-print(known_face_names)
+def handle_new_face(frame):
+    ret, buf = cv2.imencode('.jpg', frame)
+    response = requests.post(API_URL + "find_face",
+            files=dict(file=buf))
+    body = response.json()
 
 
 while True:
@@ -34,25 +28,12 @@ while True:
         rgb_frame = cv2.resize(frame, (0, 0), fx=RESIZE, fy=RESIZE)[:, :, ::-1]
         face_locations = face_recognition.face_locations(
                 rgb_frame)
-        face_encodings = face_recognition.face_encodings(
-                rgb_frame, face_locations)
-
-        new_detected_face_names = []
-        for face_encoding in face_encodings:
-            matches = face_recognition.compare_faces(
-                    known_face_encodings, face_encoding, tolerance=0.7)
-
-
-            if True in matches:
-                first_match_index = matches.index(True)
-                name = known_face_names[first_match_index]
-                new_detected_face_names.append(name)
-
-        for face_name in new_detected_face_names:
-            if face_name not in detected_face_names:
-                print("{0} is detected", face_name)
+        new_face_count = len(face_locations)
         
-        detected_face_names = new_detected_face_names
+        if face_count < new_face_count:
+            handle_new_face(frame)
+
+        face_count = new_face_count
 
 
     for loc in face_locations:
