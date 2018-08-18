@@ -47,6 +47,12 @@ def signup():
     photo_url = "https://s3-ap-northeast-1.amazonaws.com/awesome-transit-photo/" + \
         image_name
 
+    ref = db.reference().child('user').child(uid)
+    ref.set({
+        "photo_url": photo_url,
+        "balance": 10000
+        })
+
     result = reko_client.index_faces(
             CollectionId=face_collection_name,
             DetectionAttributes=["DEFAULT"],
