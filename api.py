@@ -1,14 +1,17 @@
+import time
 import uuid
 import boto3
 import os
 from flask import Flask, request, jsonify
 import firebase_admin
-from firebase_admin import credentials, auth
+from firebase_admin import credentials, auth, db
 import bcrypt
 from boto3.s3.transfer import TransferConfig
 
 cred = credentials.Certificate("./serviceAccountKey.json")
-firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred, {
+    'databaseURL': "https://awesome-transit-ea77a.firebaseio.com"
+})
 
 app = Flask(__name__)
 
@@ -131,6 +134,74 @@ def find_face():
         return jsonify(dict(name=name))
 
 
+@app.route('/enter', methods=["POST"])
+def enter():
+    image = request.files['file']
+
+    try:
+        result = reko_client.search_faces_by_image(
+                CollectionId=face_collection_name,
+                Image={'Bytes': image.read()},
+                FaceMatchThreshold=90,
+                MaxFaces=1)
+    except Exception as e:
+        print(e)
+        return jsonify(dict(result=False))
+
+
+    if len(result['FaceMatches']) == 0:
+        user_id = None
+    else:
+        user_id = result['FaceMatches'][0]['Face']['ExternalImageId']
+    timestamp = time.time()
+    state = "enter"
+
+    state = dict(
+        user_id=user_id,
+        timestamp=timestamp,
+        state=state,
+        payment=100
+        )
+
+    ref = db.reference().child('noti')
+    ref.set(state)
+
+    return jsonify(state)
+
+
+@app.route('/leave', methods=["POST"])
+def leave():
+    image = request.files['file']
+
+    try:
+        result = reko_client.search_faces_by_image(
+                CollectionId=face_collection_name,
+                Image={'Bytes': image.read()},
+                FaceMatchThreshold=90,
+                MaxFaces=1)
+    except Exception as e:
+        print(e)
+        return jsonify(dict(result=False))
+
+
+    if len(result['FaceMatches']) == 0:
+        return jsonify(dict(result=False))
+
+    user_id = result['FaceMatches'][0]['Face']['ExternalImageId']
+    timestamp = time.time()
+    state = "leave"
+
+    state = dict(
+        user_id=user_id,
+        timestamp=timestamp,
+        state=state,
+        payment=100
+        )
+
+    ref = db.reference().child('noti')
+    ref.set(state)
+
+    return jsonify(state)
 
 
 if __name__ == "__main__":
