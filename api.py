@@ -8,6 +8,10 @@ app = Flask(__name__)
 face_collection_name = "AwesomeTransit"
 reko_client = boto3.client('rekognition', region_name="ap-northeast-1")
 
+@app.route("/")
+def index():
+    return 'hello world'
+
 
 @app.route("/upload_face", methods=["POST"])
 def upload_face():
