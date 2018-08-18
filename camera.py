@@ -23,6 +23,8 @@ for filename in os.listdir('./peoples'):
     known_face_names.append(name)
     known_face_encodings.append(encoding)
 
+print(known_face_names)
+
 
 while True:
     ret, frame = video_capture.read()
@@ -38,7 +40,7 @@ while True:
         new_detected_face_names = []
         for face_encoding in face_encodings:
             matches = face_recognition.compare_faces(
-                    known_face_encodings, face_encoding)
+                    known_face_encodings, face_encoding, tolerance=0.7)
 
 
             if True in matches:
