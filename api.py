@@ -20,7 +20,7 @@ def upload_face():
             ExternalImageId=name,
             Image={'Bytes': image.read()})
     
-    return jsonify(dict(reuslt=true))
+    return jsonify(dict(reuslt=True))
 
 
 @app.route('/find_face', methods=["POST"])
@@ -33,10 +33,13 @@ def find_face():
             FaceMatchThreshold=90,
             MaxFaces=1)
 
-    print(result)
-    print(result.keys())
+    print(result['FaceMatches'])
 
-    return 'succeed'
+    if len(result['FaceMatches']) == 0:
+        return jsonify(dict(name=None))
+    else:
+        name = result['FaceMatches'][0]['Face']['ExternalImageId']
+        return jsonify(dict(name=name))
 
 
 
