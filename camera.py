@@ -52,10 +52,11 @@ while True:
         face_count = new_face_count
 
     if new_face_tick == 0:
+        resized_frame = cv2.resize(frame, (0, 0), fx=RESIZE, fy=RESIZE)
         if is_boarding_mode:
-            handle_boarding(frame)
+            handle_boarding(resized_frame)
         else:
-            handle_getting_off(frame)
+            handle_getting_off(resized_frame)
 
         new_face_tick = -1
     elif new_face_tick != -1:
