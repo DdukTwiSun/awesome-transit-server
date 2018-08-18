@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify
 import firebase_admin
 from firebase_admin import credentials, auth
 import bcrypt
+from boto3.s3.transfer import TransferConfig
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
@@ -12,7 +13,9 @@ firebase_admin.initialize_app(cred)
 app = Flask(__name__)
 
 face_collection_name = "AwesomeTransit"
+s3_bucket_name = "awesome-transit-photo"
 reko_client = boto3.client('rekognition', region_name="ap-northeast-1")
+s3_client = boto3.client('s3')
 
 
 @app.route("/signup", methods=["POST"])
@@ -24,21 +27,44 @@ def signup():
     salt = bcrypt.gensalt()
     password_hash = bcrypt.hashpw(password.encode('utf8'), salt)
 
-    user = auth.ImportUserRecord(
-        uid,
-        email=email,
-        password_hash=password_hash,
-        password_salt=salt)
-    result = auth.import_users([user], hash_alg=auth.UserImportHash.bcrypt())
+    upload_config = TransferConfig(use_threads=False)
 
-    print(result)
+    image_name = uid + ".jpg"
 
+    result = s3_client.upload_fileobj(
+        photo,
+        s3_bucket_name,
+        image_name,
+        ExtraArgs={
+            "ACL": "public-read",
+            "ContentType": photo.content_type
+        },
+        Config=upload_config)
+
+    photo_url = "https://s3-ap-northeast-1.amazonaws.com/awesome-transit-photo/" + \
+        image_name
 
     result = reko_client.index_faces(
             CollectionId=face_collection_name,
             DetectionAttributes=["DEFAULT"],
             ExternalImageId=uid,
-            Image={'Bytes': photo.read()})
+            Image=dict(
+                S3Object=dict(
+                        Bucket=s3_bucket_name,
+                        Name=image_name
+                    )
+
+            ))
+
+    user = auth.ImportUserRecord(
+        uid,
+        email=email,
+        photo_url=photo_url,
+        password_hash=password_hash,
+        password_salt=salt)
+
+    result = auth.import_users([user], hash_alg=auth.UserImportHash.bcrypt())
+
     
     return jsonify(dict(reuslt=True))
 
