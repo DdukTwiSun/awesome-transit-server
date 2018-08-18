@@ -3,7 +3,8 @@ import boto3
 import os
 from flask import Flask, request, jsonify
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, auth
+import bcrypt
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
@@ -12,6 +13,36 @@ app = Flask(__name__)
 
 face_collection_name = "AwesomeTransit"
 reko_client = boto3.client('rekognition', region_name="ap-northeast-1")
+
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    photo = request.files['photo']
+    email = request.form['email']
+    password = request.form['password']
+    uid = str(uuid.uuid4())
+    salt = bcrypt.gensalt()
+    password_hash = bcrypt.hashpw(password.encode('utf8'), salt)
+
+    user = auth.ImportUserRecord(
+        uid,
+        email=email,
+        password_hash=password_hash,
+        password_salt=salt)
+    result = auth.import_users([user], hash_alg=auth.UserImportHash.bcrypt())
+
+    print(result)
+
+
+    result = reko_client.index_faces(
+            CollectionId=face_collection_name,
+            DetectionAttributes=["DEFAULT"],
+            ExternalImageId=uid,
+            Image={'Bytes': photo.read()})
+    
+    return jsonify(dict(reuslt=True))
+
+    
 
 @app.route("/")
 def index():

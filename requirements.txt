@@ -8,3 +8,4 @@ Pillow==5.2.0
 Flask==1.0.2
 zappa==0.46.2
 requests==2.19.1
+firebase-admin==2.12.0
