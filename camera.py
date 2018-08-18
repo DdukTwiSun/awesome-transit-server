@@ -2,15 +2,18 @@ import face_recognition
 import cv2
 import os
 import requests
+from multiprocessing import Pool
 
 FRAME_SKIP = 1
 RESIZE = 0.4
-API_URL = "https://35z2j7wfmi.execute-api.ap-northeast-1.amazonaws.com/dev/"
+API_URL = "http://localhost:5000/"
+NEW_FACE_DELAY_TICK = 4
 
 video_capture = cv2.VideoCapture(0)
 frame_skip_counter = 0
 face_locations = None
 face_count = 0
+new_face_tick = -1
 
 
 def handle_new_face(frame):
@@ -18,6 +21,9 @@ def handle_new_face(frame):
     response = requests.post(API_URL + "find_face",
             files=dict(file=buf))
     body = response.json()
+    print(body)
+
+pool = Pool(processes=4)
 
 
 while True:
@@ -31,9 +37,15 @@ while True:
         new_face_count = len(face_locations)
         
         if face_count < new_face_count:
-            handle_new_face(frame)
+            new_face_tick = NEW_FACE_DELAY_TICK
 
         face_count = new_face_count
+
+    if new_face_tick == 0:
+        pool.apply_async(handle_new_face, frame)
+        new_face_tick = -1
+    elif new_face_tick != -1:
+        new_face_tick -= 1
 
 
     for loc in face_locations:
