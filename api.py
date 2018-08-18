@@ -31,13 +31,15 @@ def upload_face():
 def find_face():
     image = request.files['file']
 
-    result = reko_client.search_faces_by_image(
-            CollectionId=face_collection_name,
-            Image={'Bytes': image.read()},
-            FaceMatchThreshold=90,
-            MaxFaces=1)
+    try:
+        result = reko_client.search_faces_by_image(
+                CollectionId=face_collection_name,
+                Image={'Bytes': image.read()},
+                FaceMatchThreshold=90,
+                MaxFaces=1)
+    except:
+        return jsonify(dict(name=None))
 
-    print(result['FaceMatches'])
 
     if len(result['FaceMatches']) == 0:
         return jsonify(dict(name=None))

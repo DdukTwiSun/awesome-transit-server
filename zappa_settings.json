@@ -1,0 +1,10 @@
+{
+    "dev": {
+        "app_function": "api.app", 
+        "profile_name": "jaehak", 
+        "project_name": "transit-camera", 
+        "runtime": "python2.7", 
+        "s3_bucket": "awesome-transit",
+        "aws_region": "ap-northeast-1"
+    }
+}
