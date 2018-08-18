@@ -6,7 +6,7 @@ from multiprocessing import Pool
 import sys
 
 FRAME_SKIP = 1
-RESIZE = 0.4
+RESIZE = 0.5
 API_URL = "https://3putl16z3f.execute-api.ap-northeast-1.amazonaws.com/dev/"
 NEW_FACE_DELAY_TICK = 4
 
