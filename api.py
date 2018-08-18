@@ -128,7 +128,7 @@ def find_face():
                 CollectionId=face_collection_name,
                 Image={'Bytes': image.read()},
                 FaceMatchThreshold=90,
-                MaxFaces=1)
+                MaxFaces=4)
     except Exception as e:
         print(e)
         return jsonify(dict(name=None))
@@ -150,7 +150,7 @@ def enter():
                 CollectionId=face_collection_name,
                 Image={'Bytes': image.read()},
                 FaceMatchThreshold=80,
-                MaxFaces=1)
+                MaxFaces=4)
     except Exception as e:
         print(e)
         return jsonify(dict(result=False))
