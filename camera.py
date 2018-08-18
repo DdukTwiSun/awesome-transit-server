@@ -9,6 +9,7 @@ FRAME_SKIP = 1
 RESIZE = 0.5
 API_URL = "https://3putl16z3f.execute-api.ap-northeast-1.amazonaws.com/dev/"
 NEW_FACE_DELAY_TICK = 4
+MIN_DELAY = 10
 
 video_capture = cv2.VideoCapture(0)
 frame_skip_counter = 0
@@ -16,6 +17,7 @@ face_locations = None
 face_count = 0
 new_face_tick = -1
 is_boarding_mode = True
+delay = 0
 
 
 def handle_boarding(frame):
@@ -46,8 +48,9 @@ while True:
                 rgb_frame)
         new_face_count = len(face_locations)
         
-        if face_count < new_face_count:
+        if face_count < new_face_count and delay <= 0:
             new_face_tick = NEW_FACE_DELAY_TICK
+            delay = MIN_DELAY
 
         face_count = new_face_count
 
@@ -80,6 +83,7 @@ while True:
     cv2.imshow('Video', frame)
     
     frame_skip_counter -= 1
+    delay -= 1
 
     key = cv2.waitKey(1)
 
