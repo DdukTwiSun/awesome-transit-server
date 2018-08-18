@@ -50,7 +50,8 @@ def signup():
     ref = db.reference().child('user').child(uid)
     ref.set({
         "photo_url": photo_url,
-        "balance": 10000
+        "balance": 10000,
+        "email": email
         })
 
     result = reko_client.index_faces(
@@ -148,7 +149,7 @@ def enter():
         result = reko_client.search_faces_by_image(
                 CollectionId=face_collection_name,
                 Image={'Bytes': image.read()},
-                FaceMatchThreshold=90,
+                FaceMatchThreshold=80,
                 MaxFaces=1)
     except Exception as e:
         print(e)
@@ -197,7 +198,7 @@ def leave():
         result = reko_client.search_faces_by_image(
                 CollectionId=face_collection_name,
                 Image={'Bytes': image.read()},
-                FaceMatchThreshold=90,
+                FaceMatchThreshold=80,
                 MaxFaces=1)
     except Exception as e:
         print(e)
