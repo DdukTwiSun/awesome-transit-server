@@ -149,10 +149,24 @@ def enter():
         return jsonify(dict(result=False))
 
 
-    if len(result['FaceMatches']) == 0:
-        user_id = None
-    else:
-        user_id = result['FaceMatches'][0]['Face']['ExternalImageId']
+    last_enter_faces = db.reference().child('noti').child('last_enter_faces').get()
+    if last_enter_faces is None:
+        last_enter_faces = []
+    enter_faces = map(lambda x: x['Face']['ExternalImageId'], result['FaceMatches'])
+
+    diff = list(set(enter_faces).difference(last_enter_faces))
+    
+    user_id = None
+    if len(diff) == 1:
+        user_id = diff[0]
+    elif len(diff) > 1:
+        user_id = diff[0]
+        enter_faces = [user_id] + set(enter_faces).intersection(last_enter_faces)
+
+    if user_id is None:
+        return jsonify(user_id=None)
+
+
     timestamp = time.time()
     state = "enter"
 
@@ -160,8 +174,8 @@ def enter():
         user_id=user_id,
         timestamp=timestamp,
         state=state,
-        payment=100
-        )
+        payment=100,
+        last_enter_faces=enter_faces)
 
     ref = db.reference().child('noti')
     ref.set(state)
@@ -184,19 +198,33 @@ def leave():
         return jsonify(dict(result=False))
 
 
-    if len(result['FaceMatches']) == 0:
-        return jsonify(dict(result=False))
+    last_leave_faces = db.reference().child('noti').child('last_leave_faces').get()
+    if last_leave_faces is None:
+        last_leave_faces = []
+    leave_faces = map(lambda x: x['Face']['ExternalImageId'], result['FaceMatches'])
 
-    user_id = result['FaceMatches'][0]['Face']['ExternalImageId']
+    diff = list(set(leave_faces).difference(last_leave_faces))
+    
+    user_id = None
+    if len(diff) == 1:
+        user_id = diff[0]
+    elif len(diff) > 1:
+        user_id = diff[0]
+        leave_faces = [user_id] + set(leave_faces).intersection(last_leave_faces)
+
+    if user_id is None:
+        return jsonify(user_id=None)
+
     timestamp = time.time()
     state = "leave"
+
 
     state = dict(
         user_id=user_id,
         timestamp=timestamp,
         state=state,
-        payment=100
-        )
+        payment=100,
+        last_leave_faces=leave_faces)
 
     ref = db.reference().child('noti')
     ref.set(state)
