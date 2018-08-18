@@ -10,7 +10,10 @@ reko_client = boto3.client('rekognition', region_name="ap-northeast-1")
 
 @app.route("/")
 def index():
-    return 'hello world'
+    print(boto3.DEFAULT_SESSION)
+    return jsonify(dict(
+        session=str(boto3.DEFAULT_SESSION)
+        ))
 
 
 @app.route("/upload_face", methods=["POST"])
