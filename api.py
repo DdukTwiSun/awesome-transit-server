@@ -156,7 +156,7 @@ def enter():
         return jsonify(dict(result=False))
 
 
-    last_enter_faces = db.reference().child('noti').child('last_enter_faces').get()
+    last_enter_faces = db.reference().child('noti_enter').child('last_enter_faces').get()
     if last_enter_faces is None:
         last_enter_faces = []
     enter_faces = map(lambda x: x['Face']['ExternalImageId'], result['FaceMatches'])
@@ -184,7 +184,7 @@ def enter():
         payment=100,
         last_enter_faces=enter_faces)
 
-    ref = db.reference().child('noti')
+    ref = db.reference().child('noti_enter')
     ref.set(state)
 
     return jsonify(state)
@@ -205,7 +205,7 @@ def leave():
         return jsonify(dict(result=False))
 
 
-    last_leave_faces = db.reference().child('noti').child('last_leave_faces').get()
+    last_leave_faces = db.reference().child('noti_leave').child('last_leave_faces').get()
     if last_leave_faces is None:
         last_leave_faces = []
     leave_faces = map(lambda x: x['Face']['ExternalImageId'], result['FaceMatches'])
@@ -233,7 +233,7 @@ def leave():
         payment=100,
         last_leave_faces=leave_faces)
 
-    ref = db.reference().child('noti')
+    ref = db.reference().child('noti_leave')
     ref.set(state)
 
     return jsonify(state)
