@@ -8,6 +8,8 @@ from firebase_admin import credentials, auth, db
 import bcrypt
 from boto3.s3.transfer import TransferConfig
 from flask_cors import CORS
+import base64
+from io import BytesIO
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {
@@ -25,7 +27,13 @@ s3_client = boto3.client('s3')
 
 @app.route("/signup", methods=["POST"])
 def signup():
-    photo = request.files['photo']
+    if 'photo' in request.files:
+        photo = request.files['photo']
+    else:
+        photo = request.form['photo']
+        photo = photo.replace('data:image/jpeg;base64,', '')
+        photo = BytesIO(base64.b64decode(photo))
+
     email = request.form['email']
     password = request.form['password']
     uid = str(uuid.uuid4())
@@ -42,7 +50,7 @@ def signup():
         image_name,
         ExtraArgs={
             "ACL": "public-read",
-            "ContentType": photo.content_type
+            "ContentType": "image/jpeg"
         },
         Config=upload_config)
 
