@@ -7,6 +7,7 @@ import firebase_admin
 from firebase_admin import credentials, auth, db
 import bcrypt
 from boto3.s3.transfer import TransferConfig
+from flask_cors import CORS
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {
@@ -14,6 +15,7 @@ firebase_admin.initialize_app(cred, {
 })
 
 app = Flask(__name__)
+CORS(app)
 
 face_collection_name = "AwesomeTransit"
 s3_bucket_name = "awesome-transit-photo"
