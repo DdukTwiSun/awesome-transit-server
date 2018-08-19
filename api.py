@@ -179,7 +179,7 @@ def enter():
         user_id = diff[0]
     elif len(diff) > 1:
         user_id = diff[0]
-        enter_faces = [user_id] + set(enter_faces).intersection(last_enter_faces)
+        enter_faces = [user_id] + list(set(enter_faces).intersection(last_enter_faces))
 
     if user_id is None:
         return jsonify(user_id=None)
@@ -229,7 +229,7 @@ def leave():
         user_id = diff[0]
     elif len(diff) > 1:
         user_id = diff[0]
-        leave_faces = [user_id] + set(leave_faces).intersection(last_leave_faces)
+        leave_faces = [user_id] + list(set(leave_faces).intersection(last_leave_faces))
 
     if user_id is None:
         return jsonify(user_id=None)
